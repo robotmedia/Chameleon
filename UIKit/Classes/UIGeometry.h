@@ -67,6 +67,7 @@ static inline BOOL UIOffsetEqualToOffset(UIOffset offset1, UIOffset offset2) {
 
 extern const UIOffset UIOffsetZero;
 
+CGPoint CGPointFromString(NSString *string);
 NSString *NSStringFromCGPoint(CGPoint p);
 NSString *NSStringFromCGRect(CGRect r);
 NSString *NSStringFromCGSize(CGSize s);
