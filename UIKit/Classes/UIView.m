@@ -1115,4 +1115,15 @@ static BOOL _animationsEnabled = YES;
     return [NSString stringWithFormat:@"<%@: %p; frame = %@; hidden = %@; layer = %@>", [self className], self, NSStringFromCGRect(self.frame), (self.hidden ? @"YES" : @"NO"), self.layer];
 }
 
+#pragma mark - NSCoding
+// Required for subclasses prepared for NIB files
+
+- (id) initWithCoder:(NSCoder *)aDecoder {
+    return [self initWithFrame:CGRectZero];
+}
+
+- (void)encodeWithCoder:(NSCoder *)aCoder {
+    // Do nothing
+}
+
 @end

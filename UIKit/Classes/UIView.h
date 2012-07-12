@@ -99,7 +99,7 @@ typedef NSUInteger UIViewAnimationOptions;
 
 @class UIColor, CALayer, UIViewController, UIGestureRecognizer;
 
-@interface UIView : UIResponder <UIAppearanceContainer, UIAppearance> {
+@interface UIView : UIResponder <UIAppearanceContainer, UIAppearance, NSCoding> {
 @private
     UIView *_superview;
     NSMutableSet *_subviews;
