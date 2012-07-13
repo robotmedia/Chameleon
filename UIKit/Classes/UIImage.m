@@ -38,6 +38,9 @@
 
 + (UIImage *)_imageNamed:(NSString *)name
 {
+    // Original imageNamed supports nil argument. The "Ramp Champ" hack below crashes if name is nil so we exit here.
+    if (!name) return nil;
+    
     NSBundle *bundle = [NSBundle mainBundle];
     NSString *path = [[bundle resourcePath] stringByAppendingPathComponent:name];
     UIImage *img = [self imageWithContentsOfFile:path];
