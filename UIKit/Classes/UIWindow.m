@@ -67,7 +67,9 @@ NSString *const UIKeyboardCenterEndUserInfoKey = @"UIKeyboardCenterEndUserInfoKe
 NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
 
 
-@implementation UIWindow
+@implementation UIWindow {
+    UIGestureRecognizer* _continuousGestureRecognizer;
+}
 @synthesize screen=_screen, rootViewController=_rootViewController;
 
 - (id)initWithFrame:(CGRect)theFrame
@@ -152,16 +154,16 @@ NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
         
         const BOOL wasHidden = self.hidden;
         [self _makeHidden];
-
+        
         [self.layer removeFromSuperlayer];
         [_screen release];
         _screen = [theScreen retain];
         [[_screen _layer] addSublayer:self.layer];
-
+        
         if (!wasHidden) {
             [self _makeVisible];
         }
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_screenModeChangedNotification:) name:UIScreenModeDidChangeNotification object:_screen];
     }
 }
@@ -170,7 +172,7 @@ NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
 {
     UIScreenMode *previousMode = [[note userInfo] objectForKey:@"_previousMode"];
     UIScreenMode *newMode = _screen.currentMode;
-
+    
     if (!CGSizeEqualToSize(previousMode.size,newMode.size)) {
         [self _superviewSizeDidChangeFrom:previousMode.size to:newMode.size];
     }
@@ -188,7 +190,7 @@ NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
         if (toWindow) {
             // Now convert the screen coords into the other screen's coordinate space
             toConvert = [self.screen convertPoint:toConvert toScreen:toWindow.screen];
-
+            
             // And now convert it from the new screen's space into the window's space
             toConvert.x -= toWindow.frame.origin.x;
             toConvert.y -= toWindow.frame.origin.y;
@@ -215,7 +217,7 @@ NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
         // Convert to window coordinates
         toConvert.x -= self.frame.origin.x;
         toConvert.y -= self.frame.origin.y;
-
+        
         return toConvert;
     }
 }
@@ -313,16 +315,29 @@ NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
 {
     if (event.type == UIEventTypeTouches) {
         NSSet *touches = [event touchesForWindow:self];
-        NSMutableSet *gestureRecognizers = [NSMutableSet setWithCapacity:0];
-
-        for (UITouch *touch in touches) {
-            [gestureRecognizers addObjectsFromArray:touch.gestureRecognizers];
+        
+        if (_continuousGestureRecognizer) {
+            [_continuousGestureRecognizer _recognizeTouches:touches withEvent:event];
+            UIGestureRecognizerState state = _continuousGestureRecognizer.state;
+            if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateFailed || state == UIGestureRecognizerStateCancelled) {
+                _continuousGestureRecognizer = nil;
+            } else {
+                return;
+            }
         }
-
+        
+        NSArray *gestureRecognizers = ((UITouch*)[touches anyObject]).gestureRecognizers;
+        
         for (UIGestureRecognizer *recognizer in gestureRecognizers) {
             [recognizer _recognizeTouches:touches withEvent:event];
+            
+            // Continuous gesture detected
+            if (recognizer.state == UIGestureRecognizerStateBegan) {
+                _continuousGestureRecognizer = recognizer;
+                return; // Don't send touches to other gesture recognizes or the view
+            }
         }
-
+        
         for (UITouch *touch in touches) {
             // normally there'd be no need to retain the view here, but this works around a strange problem I ran into.
             // what can happen is, now that UIView's -removeFromSuperview will remove the view from the active touch
@@ -344,7 +359,7 @@ NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
             // better way to fix this without it having to have this hacky-feeling retain here, that'd be cool, but be
             // aware that this is here for a reason and that the problem it prevents is very rare and somewhat contrived.
             UIView *view = [touch.view retain];
-
+            
             const UITouchPhase phase = touch.phase;
             const _UITouchGesture gesture = [touch _gesture];
             
@@ -368,7 +383,7 @@ NSString *const UIKeyboardBoundsUserInfoKey = @"UIKeyboardBoundsUserInfoKey";
             }
             
             NSCursor *newCursor = [view mouseCursorForEvent:event] ?: [NSCursor arrowCursor];
-
+            
             if ([NSCursor currentCursor] != newCursor) {
                 [newCursor set];
             }
