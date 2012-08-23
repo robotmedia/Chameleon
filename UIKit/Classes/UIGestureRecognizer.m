@@ -300,6 +300,13 @@
             }
         }
     }
+    
+    // Cancel touches if the gesture was recognized and required
+    if (self.state == UIGestureRecognizerStateRecognized && self.cancelsTouchesInView) {
+        for (UITouch* touch in touches) {
+            [touch _setTouchPhaseCancelled];
+        }
+    }
 }
 
 - (NSString *)description
