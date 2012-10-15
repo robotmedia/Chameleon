@@ -95,6 +95,12 @@ typedef enum {
 - (void)setEditing:(BOOL)editing animated:(BOOL)animated;
 - (UIBarButtonItem *)editButtonItem;	// not implemented
 
+// New Autorotation support.
+- (BOOL)shouldAutorotate NS_AVAILABLE_IOS(6_0);
+- (NSUInteger)supportedInterfaceOrientations NS_AVAILABLE_IOS(6_0);
+// Returns interface orientation masks.
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation NS_AVAILABLE_IOS(6_0);
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration;
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation duration:(NSTimeInterval)duration;
