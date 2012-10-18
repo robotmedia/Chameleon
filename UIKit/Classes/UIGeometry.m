@@ -32,8 +32,28 @@
 const UIEdgeInsets UIEdgeInsetsZero = {0,0,0,0};
 const UIOffset UIOffsetZero = {0,0};
 
-CGPoint CGPointFromString(NSString *string) {
+CGPoint CGPointFromString(NSString *string)
+{
     return NSPointToCGPoint(NSPointFromString(string));
+}
+
+CGRect CGRectFromString(NSString *string)
+{
+    return NSRectToCGRect(NSRectFromString(string));
+}
+
+CGAffineTransform CGAffineTransformFromString(NSString *string)
+{
+    string = [string stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"[ ]"]];
+    NSArray *components = [string componentsSeparatedByString:@","];
+    CGAffineTransform transform;
+    transform.a = [[components objectAtIndex:0] floatValue];
+    transform.b = [[components objectAtIndex:1] floatValue];
+    transform.c = [[components objectAtIndex:2] floatValue];
+    transform.d = [[components objectAtIndex:3] floatValue];
+    transform.tx = [[components objectAtIndex:4] floatValue];
+    transform.ty = [[components objectAtIndex:5] floatValue];
+    return transform;
 }
 
 NSString *NSStringFromCGPoint(CGPoint p)
